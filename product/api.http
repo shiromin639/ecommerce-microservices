@@ -1,0 +1,9 @@
+### Create a new category
+# @name createCategory
+POST http://localhost:4000/v1/categories
+
+{
+  "name": "Mechanical Keyboards",
+  "slug": "mechanical-keyboards",
+  "description": "Premium switches and keycaps for enthusiasts"
+}
