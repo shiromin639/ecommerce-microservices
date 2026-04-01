@@ -7,7 +7,6 @@ import (
 )
 
 func (app *application) createCategoryHandler(w http.ResponseWriter, r *http.Request) {
-
 	// type Category struct {
 	// 	ID       uuid.UUID
 	// 	ParentID *uuid.UUID // nil = root category (no parent)
