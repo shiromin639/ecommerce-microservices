@@ -18,9 +18,9 @@ func (app *application) createCategoryHandler(w http.ResponseWriter, r *http.Req
 	// 	CreatedAt   time.Time
 	// }
 	var input struct {
-		Name        string
-		Slug        string
-		Description string
+		Name        string `json:"name"`
+		Slug        string `json:"slug"`
+		Description string `json:"description"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -33,13 +33,13 @@ func (app *application) createCategoryHandler(w http.ResponseWriter, r *http.Req
 		Name:        input.Name,
 		Slug:        input.Slug,
 		Description: input.Description,
-		IsActive:    false,
 		CreatedAt:   time.Now(),
 	}
 
 	err = app.models.Categories.Insert(&category)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+		app.logger.Error("could not write to database")
 		return
 	}
 

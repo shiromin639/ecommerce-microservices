@@ -9,14 +9,13 @@ import (
 )
 
 type Category struct {
-	ID       uuid.UUID
-	ParentID *uuid.UUID // nil = root category (no parent)
-	// pointer because NULL is meaningful here
-	Name        string
-	Slug        string
-	Description string
-	IsActive    bool // false = hidden from navigation, products still exist
-	CreatedAt   time.Time
+	ID          uuid.UUID  `json:"id"`
+	ParentID    *uuid.UUID `json:"parent_id"`
+	Name        string     `json:"name"`
+	Slug        string     `json:"slug"`
+	Description string     `json:"description"`
+	IsActive    bool       `json:is_active"` // false = hidden from navigation, products still exist
+	CreatedAt   time.Time  `json:"created_at"`
 }
 
 type CategoryModel struct {

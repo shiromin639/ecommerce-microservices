@@ -1,6 +1,6 @@
 ### Create a new category
 # @name createCategory
-POST http://localhost:4000/v1/categories
+POST http://localhost:5000/v1/categories
 
 {
   "name": "Mechanical Keyboards",
