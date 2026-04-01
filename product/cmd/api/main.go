@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"product/internal/data"
 	"sync"
 	"time"
 
@@ -41,6 +42,7 @@ type config struct {
 type application struct {
 	config config
 	logger *slog.Logger
+	models data.Models
 	wg     sync.WaitGroup
 }
 
@@ -70,9 +72,17 @@ func main() {
 		// AddSource: true,
 	}))
 
+	db, err := openDB(cfg)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	defer db.Close()
 	app := application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModels(db),
 	}
 
 	srv := &http.Server{

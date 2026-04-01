@@ -37,6 +37,12 @@ func (app *application) createCategoryHandler(w http.ResponseWriter, r *http.Req
 		CreatedAt:   time.Now(),
 	}
 
+	err = app.models.Categories.Insert(&category)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	err = app.writeJSON(w, http.StatusCreated, envelope{"category": category}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
