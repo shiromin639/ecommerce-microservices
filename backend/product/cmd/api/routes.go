@@ -14,5 +14,7 @@ func (app *application) routes() http.Handler {
 
 	r.Post("/v1/categories", app.createCategoryHandler)
 	r.Get("/v1/categories", app.listCategoriesHandler)
+
+	r.Post("/v1/products", app.createProductHandler)
 	return r
 }
