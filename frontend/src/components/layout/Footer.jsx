@@ -1,90 +1,82 @@
-/**
- * Footer.jsx  —  Footer đầy đủ kiểu Apple
- */
-
-import React from 'react';
-import { Link } from 'react-router-dom';
-import styles from './Footer.module.css';
-
-const LINKS = {
-  'Sản phẩm': [
-    { label: 'MacBook',     href: '/products?category=macbook'   },
-    { label: 'Gaming',      href: '/products?category=gaming'    },
-    { label: 'Văn phòng',   href: '/products?category=office'    },
-    { label: 'Mỏng & Nhẹ', href: '/products?category=ultrabook' },
-    { label: 'Hot Deals',   href: '/products?hot=true'           },
-  ],
-  'Hỗ trợ': [
-    { label: 'Hướng dẫn mua hàng', href: '/guide'     },
-    { label: 'Chính sách đổi trả', href: '/return'    },
-    { label: 'Bảo hành',           href: '/warranty'  },
-    { label: 'Tra cứu đơn hàng',   href: '/orders'    },
-    { label: 'Liên hệ',            href: '/contact'   },
-  ],
-  'Công ty': [
-    { label: 'Về chúng tôi', href: '/about'   },
-    { label: 'Tuyển dụng',   href: '/careers' },
-    { label: 'Tin tức',      href: '/news'    },
-    { label: 'Đối tác',      href: '/partner' },
-  ],
-};
+import { Link } from 'react-router-dom'
+import { Mail, Phone, MapPin, Facebook, Youtube, Instagram } from 'lucide-react'
+import styles from './Footer.module.css'
 
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      <div className={styles.container}>
-
-        {/* Top */}
-        <div className={styles.top}>
+      <div className="container">
+        <div className={styles.grid}>
+          {/* Brand */}
           <div className={styles.brand}>
             <Link to="/" className={styles.logo}>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                <rect width="28" height="28" rx="7" fill="currentColor"/>
-                <path d="M8 20V10l6-3 6 3v10l-6 3-6-3z" fill="white" fillOpacity="0.9"/>
-                <path d="M14 7v14M8 10l6 3 6-3" stroke="white" strokeWidth="1.2" strokeOpacity="0.5"/>
-              </svg>
-              LapStore
+              <span>⚡</span> TechLap
             </Link>
-            <p className={styles.tagline}>
-              Điểm đến tin cậy của mọi laptop chính hãng tại Việt Nam.
+            <p className={styles.desc}>
+              Hệ thống bán laptop uy tín hàng đầu Việt Nam. Cam kết chính hãng 100%, bảo hành tận nơi.
             </p>
             <div className={styles.socials}>
-              {[
-                { label: 'Facebook',  href: '#', icon: 'f' },
-                { label: 'Zalo',      href: '#', icon: 'z' },
-                { label: 'YouTube',   href: '#', icon: '▶' },
-              ].map((s) => (
-                <a key={s.label} href={s.href} className={styles.socialIcon} aria-label={s.label}>
-                  {s.icon}
-                </a>
-              ))}
+              <a href="#" className={styles.social}><Facebook size={18} /></a>
+              <a href="#" className={styles.social}><Youtube size={18} /></a>
+              <a href="#" className={styles.social}><Instagram size={18} /></a>
             </div>
           </div>
 
-          {Object.entries(LINKS).map(([section, links]) => (
-            <div key={section} className={styles.linkGroup}>
-              <h4 className={styles.linkGroupTitle}>{section}</h4>
-              <ul className={styles.linkList}>
-                {links.map((l) => (
-                  <li key={l.label}>
-                    <Link to={l.href} className={styles.footerLink}>{l.label}</Link>
-                  </li>
-                ))}
-              </ul>
+          {/* Products */}
+          <div className={styles.col}>
+            <h4 className={styles.colTitle}>Sản phẩm</h4>
+            <ul className={styles.colList}>
+              {['Laptop Gaming', 'Laptop Văn phòng', 'Laptop Đồ họa', 'MacBook', 'Ultrabook', 'Laptop Sinh viên'].map(item => (
+                <li key={item}><Link to="/products" className={styles.colLink}>{item}</Link></li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Brands */}
+          <div className={styles.col}>
+            <h4 className={styles.colTitle}>Thương hiệu</h4>
+            <ul className={styles.colList}>
+              {['Apple', 'Dell', 'ASUS', 'HP', 'Lenovo', 'MSI', 'Acer'].map(brand => (
+                <li key={brand}>
+                  <Link to={`/products?brand=${brand.toLowerCase()}`} className={styles.colLink}>{brand}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div className={styles.col}>
+            <h4 className={styles.colTitle}>Liên hệ</h4>
+            <ul className={styles.contactList}>
+              <li>
+                <Phone size={15} />
+                <a href="tel:1900599912">1900 599 912</a>
+              </li>
+              <li>
+                <Mail size={15} />
+                <a href="mailto:support@techlap.vn">support@techlap.vn</a>
+              </li>
+              <li>
+                <MapPin size={15} />
+                <span>123 Nguyễn Văn Linh, Q.7, TP.HCM</span>
+              </li>
+            </ul>
+            <div className={styles.certBadges}>
+              <div className={styles.certBadge}>🔒 Thanh toán an toàn</div>
+              <div className={styles.certBadge}>✅ Hàng chính hãng</div>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Bottom */}
         <div className={styles.bottom}>
-          <p className={styles.copy}>© {new Date().getFullYear()} LapStore. Tất cả quyền được bảo lưu.</p>
-          <div className={styles.paymentLogos}>
-            {['VNPay', 'ZaloPay', 'Visa', 'MasterCard', 'JCB'].map(p => (
-              <span key={p} className={styles.paymentLogo}>{p}</span>
-            ))}
+          <p>© 2024 TechLap. All rights reserved.</p>
+          <div className={styles.bottomLinks}>
+            <Link to="#">Chính sách bảo mật</Link>
+            <Link to="#">Điều khoản sử dụng</Link>
+            <Link to="#">Chính sách đổi trả</Link>
           </div>
         </div>
       </div>
     </footer>
-  );
+  )
 }
