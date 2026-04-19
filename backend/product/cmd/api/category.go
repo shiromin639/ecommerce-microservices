@@ -55,7 +55,7 @@ func (app *application) listCategoriesHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, envelope{"movies": categories}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"categories": categories}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
