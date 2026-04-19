@@ -1,136 +1,107 @@
-/**
- * ProductCard.jsx  —  Thẻ sản phẩm kiểu Apple Store
- * - Hover effect: image scale + shadow
- * - Hiển thị: ảnh, tên, cấu hình tóm tắt, giá, badge
- * - Quick add to cart button xuất hiện khi hover
- * - Skeleton loading state
- */
-
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCartStore } from '../../store';
-import { formatCurrency } from '../../utils/format';
-import styles from './ProductCard.module.css';
+import { Link } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { Heart, ShoppingCart, Star, Zap } from 'lucide-react'
+import { addToCart } from '../../store/cartSlice'
+import { useWishlist } from '../../hooks'
+import { formatPrice } from '../../utils'
+import toast from 'react-hot-toast'
+import styles from './ProductCard.module.css'
 
 export default function ProductCard({ product, index = 0 }) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [imgError, setImgError] = useState(false);
-  const { addItem } = useCartStore();
+  const dispatch = useDispatch()
+  const { toggle, isWished } = useWishlist()
+  const wished = isWished(product.id)
 
-  if (!product) return <ProductCardSkeleton />;
+  const handleAddToCart = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    dispatch(addToCart(product))
+    toast.success(`Đã thêm ${product.name.slice(0, 30)}... vào giỏ hàng`)
+  }
 
-  const {
-    id, slug, name, brand, price, salePrice,
-    images, specs, isFeatured, isHotDeal, stock,
-  } = product;
-
-  const discountPercent = salePrice
-    ? Math.round((1 - salePrice / price) * 100)
-    : null;
-
-  const displayPrice = salePrice || price;
-  const thumbnail    = imgError ? '/placeholder-laptop.jpg' : (images?.[0] || '/placeholder-laptop.jpg');
-
-  const handleAddToCart = async (e) => {
-    e.preventDefault();   // Không navigate
-    e.stopPropagation();
-    if (isAdding || stock === 0) return;
-    setIsAdding(true);
-    await addItem(id);
-    setIsAdding(false);
-  };
-
-  // Tóm tắt cấu hình để hiển thị dưới tên
-  const specSummary = [
-    specs?.cpu  && specs.cpu.split(' ').slice(0, 3).join(' '),
-    specs?.ram  && `${specs.ram} RAM`,
-    specs?.ssd  && `${specs.ssd} SSD`,
-  ].filter(Boolean).join(' · ');
+  const handleWishlist = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggle(product.id)
+    toast(wished ? 'Đã xóa khỏi yêu thích' : '❤️ Đã thêm vào yêu thích')
+  }
 
   return (
     <Link
-      to={`/products/${slug}`}
+      to={`/products/${product.id}`}
       className={styles.card}
       style={{ animationDelay: `${index * 60}ms` }}
     >
-      {/* ── BADGES ── */}
+      {/* Badges */}
       <div className={styles.badges}>
-        {isHotDeal && <span className={`${styles.badge} ${styles.badgeHot}`}>Hot Deal</span>}
-        {isFeatured && !isHotDeal && <span className={`${styles.badge} ${styles.badgeNew}`}>Nổi bật</span>}
-        {discountPercent && (
-          <span className={`${styles.badge} ${styles.badgeSale}`}>-{discountPercent}%</span>
+        {product.isNew && <span className={`badge badge-primary ${styles.badge}`}>Mới</span>}
+        {product.isFlashSale && (
+          <span className={`badge badge-danger ${styles.badge}`}>
+            <Zap size={10} /> Sale
+          </span>
         )}
-        {stock === 0 && <span className={`${styles.badge} ${styles.badgeOut}`}>Hết hàng</span>}
       </div>
 
-      {/* ── IMAGE ── */}
+      {/* Wishlist */}
+      <button
+        className={`${styles.wishBtn} ${wished ? styles.wished : ''}`}
+        onClick={handleWishlist}
+        aria-label="Wishlist"
+      >
+        <Heart size={16} fill={wished ? 'currentColor' : 'none'} />
+      </button>
+
+      {/* Image */}
       <div className={styles.imageWrap}>
         <img
-          src={thumbnail}
-          alt={name}
+          src={product.image}
+          alt={product.name}
           className={styles.image}
-          onError={() => setImgError(true)}
           loading="lazy"
         />
-
-        {/* Quick add button */}
-        <button
-          className={`${styles.quickAdd} ${stock === 0 ? styles.quickAddDisabled : ''}`}
-          onClick={handleAddToCart}
-          disabled={isAdding || stock === 0}
-          aria-label={stock === 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
-        >
-          {isAdding ? (
-            <span className={styles.spinner}/>
-          ) : stock === 0 ? (
-            'Hết hàng'
-          ) : (
-            <>
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-              Thêm vào giỏ
-            </>
-          )}
-        </button>
+        <div className={styles.imageOverlay}>
+          <button className={styles.quickAdd} onClick={handleAddToCart}>
+            <ShoppingCart size={15} />
+            Thêm vào giỏ
+          </button>
+        </div>
       </div>
 
-      {/* ── INFO ── */}
-      <div className={styles.info}>
-        <p className={styles.brand}>{brand}</p>
-        <h3 className={styles.name}>{name}</h3>
+      {/* Content */}
+      <div className={styles.content}>
+        <div className={styles.brand}>{product.brand.toUpperCase()}</div>
+        <h3 className={styles.name}>{product.name}</h3>
 
-        {specSummary && (
-          <p className={styles.specs}>{specSummary}</p>
-        )}
-
-        <div className={styles.priceRow}>
-          <span className={styles.price}>{formatCurrency(displayPrice)}</span>
-          {salePrice && (
-            <span className={styles.originalPrice}>{formatCurrency(price)}</span>
-          )}
+        {/* Specs Pills */}
+        <div className={styles.specPills}>
+          <span className={styles.pill}>{product.specs.cpu.split(' ').slice(0, 3).join(' ')}</span>
+          <span className={styles.pill}>{product.specs.ram}</span>
+          <span className={styles.pill}>{product.specs.storage}</span>
         </div>
 
-        {/* Stock indicator */}
-        {stock > 0 && stock <= 5 && (
-          <p className={styles.lowStock}>Chỉ còn {stock} sản phẩm</p>
-        )}
+        {/* Rating */}
+        <div className={styles.meta}>
+          <div className={styles.rating}>
+            <Star size={12} fill="currentColor" className={styles.starIcon} />
+            <span>{product.rating}</span>
+            <span className={styles.reviews}>({product.reviews})</span>
+          </div>
+          <span className={styles.sold}>Đã bán {product.sold.toLocaleString()}</span>
+        </div>
+
+        {/* Price */}
+        <div className={styles.pricing}>
+          <span className={`price-current ${styles.price}`}>
+            {formatPrice(product.price)}
+          </span>
+          {product.discount > 0 && (
+            <div className={styles.discountRow}>
+              <span className="price-original">{formatPrice(product.originalPrice)}</span>
+              <span className="price-discount">-{product.discount}%</span>
+            </div>
+          )}
+        </div>
       </div>
     </Link>
-  );
-}
-
-/* ── SKELETON ── */
-export function ProductCardSkeleton() {
-  return (
-    <div className={styles.skeleton}>
-      <div className={`${styles.skeletonImage} ${styles.shimmer}`}/>
-      <div className={styles.skeletonInfo}>
-        <div className={`${styles.skeletonLine} ${styles.shimmer}`} style={{ width: '40%', height: 12 }}/>
-        <div className={`${styles.skeletonLine} ${styles.shimmer}`} style={{ width: '80%', height: 18 }}/>
-        <div className={`${styles.skeletonLine} ${styles.shimmer}`} style={{ width: '60%', height: 12 }}/>
-        <div className={`${styles.skeletonLine} ${styles.shimmer}`} style={{ width: '45%', height: 20 }}/>
-      </div>
-    </div>
-  );
+  )
 }
