@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from app.api.routes import healthcheck, categories
+
+from app.api.routes import category, product
 
 api_router = APIRouter()
-
-api_router.include_router(categories.router)
-api_router.include_router(healthcheck.router)
+api_router.include_router(category.router)
+api_router.include_router(product.router)
