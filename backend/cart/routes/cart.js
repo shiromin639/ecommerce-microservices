@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Cart = require('../models/Cart'); // Import cái khuôn mẫu Giỏ hàng đã tạo ở Bước 2
 
+const INVENTORY_SERVICE_URL = process.env.INVENTORY_SERVICE_URL
+
 // 1. API: THÊM HOẶC CẬP NHẬT SẢN PHẨM VÀO GIỎ HÀNG
 // Phương thức: POST
 router.post('/', async (req, res) => {
   try {
-    // Lấy thông tin từ client gửi lên (bạn sẽ nhập cái này trong Postman)
+    // Lấy thông tin từ client gửi lên 
     const { userId, productId, quantity } = req.body;
 
     if (!quantity || quantity <= 0) {
@@ -15,6 +17,40 @@ router.post('/', async (req, res) => {
 
     // Tìm xem user này đã có giỏ hàng trong Database chưa
     let cart = await Cart.findOne({ userId: userId });
+    let currentQuantityInCart = 0;
+
+    if (cart) {
+      // Nếu đã có giỏ hàng, tìm xem sản phẩm này đang có sẵn bao nhiêu cái trong giỏ
+      const itemIndex = cart.items.findIndex(item => item.productId === productId);
+      if (itemIndex > -1) {
+        currentQuantityInCart = cart.items[itemIndex].quantity;
+      }
+    }
+
+    // Tính tổng số lượng khách muốn mua (số đang có trong giỏ + số vừa thêm)
+    const totalRequestedQuantity = currentQuantityInCart + quantity;
+
+    try {
+      const INVENTORY_SERVICE_URL = process.env.INVENTORY_SERVICE_URL;
+      // Gọi API sang Inventory Service để lấy số tồn kho
+      const inventoryResponse = await axios.get(`${INVENTORY_SERVICE_URL}/${productId}`);
+      const stockAvailable = inventoryResponse.data.stock;
+
+      // Chặn lại nếu tổng số lượng muốn mua vượt quá số hàng trong kho
+      if (totalRequestedQuantity > stockAvailable) {
+        return res.status(400).json({ 
+          message: "Không đủ hàng trong kho", 
+          stockAvailable: stockAvailable,
+          requestedQuantity: totalRequestedQuantity
+        });
+      }
+    } catch (inventoryError) {
+      if (inventoryError.response && inventoryError.response.status === 404) {
+        return res.status(404).json({ message: "Sản phẩm không tồn tại trong kho" });
+      }
+      return res.status(500).json({ message: "Lỗi khi kết nối với hệ thống quản lý kho" });
+    }
+
 
     if (cart) {
       // Nếu có giỏ hàng rồi, kiểm tra xem sản phẩm này đã có trong giỏ chưa
@@ -47,7 +83,7 @@ router.post('/', async (req, res) => {
 // 2. API: LẤY THÔNG TIN GIỎ HÀNG CỦA USER
 // Phương thức: GET
 // Giả sử URL của Product Service bạn tìm được là:
-const PRODUCT_SERVICE_URL = "http://localhost:5000/v1/products";
+const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL;
 
 router.get('/:userId', async (req, res) => {
   try {
