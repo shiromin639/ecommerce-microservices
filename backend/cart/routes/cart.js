@@ -70,7 +70,7 @@ router.get('/:userId', async (req, res) => {
                     quantity: item.quantity,
                     name: productDetail.name,   // Ví dụ: MSI Bravo 15
                     price: productDetail.price, // Ví dụ: 18000000
-                    image: productDetail.image  // Nếu có
+                    // image: productDetail.image  // Nếu có
                 };
             } catch (err) {
                 // Nếu không gọi được Product Service, trả về thông tin cơ bản
